@@ -29,6 +29,8 @@ Options:
     --northernui DIR  folder holding NorthernUI.dll (adds controller support)
     --redeploy        re-upload the saved build without re-downloading anything
     --keep            keep work/Oblivion.console.exe after a successful patch
+    --no-ini          do not install config/oblivion-preset.ini as Oblivion.ini
+    --force-ini       replace an Oblivion.ini that is already on the console
 """
 import argparse
 import hashlib
@@ -134,6 +136,87 @@ def sync_manifest(ftp, game, entries):
     print("  manifest synced")
 
 
+PRESET = os.path.join(HERE, "config", "oblivion-preset.ini")
+
+
+def read_preset(path):
+    """Parse the preset into [(section, [(key, value), ...]), ...]."""
+    sections = []
+    current = None
+    for raw in open(path, encoding="utf-8").read().splitlines():
+        line = raw.strip()
+        if not line or line[0] in ";#":
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            current = (line[1:-1].strip(), [])
+            sections.append(current)
+        elif "=" in line and current is not None:
+            key, value = line.split("=", 1)
+            current[1].append((key.strip(), value.strip()))
+    return sections
+
+
+def merge_preset(base_text, sections):
+    """Apply preset values over a stock ini, keeping every other line as-is."""
+    lines = base_text.splitlines()
+    # Split into blocks: one preamble plus one block per [section].
+    blocks = [[None, []]]
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            blocks.append([stripped, []])
+        else:
+            blocks[-1][1].append(line)
+
+    index = {}
+    for block in blocks[1:]:
+        index.setdefault(block[0].lower(), block)
+
+    for name, entries in sections:
+        block = index.get(("[%s]" % name).lower())
+        if block is None:
+            block = ["[%s]" % name, []]
+            blocks.append(block)
+            index[block[0].lower()] = block
+        body = block[1]
+        positions = {}
+        for i, line in enumerate(body):
+            stripped = line.strip()
+            if "=" in stripped and not stripped.startswith(";"):
+                positions[stripped.split("=", 1)[0].strip().lower()] = i
+        extra = []
+        for key, value in entries:
+            i = positions.get(key.lower())
+            if i is None:
+                extra.append("%s=%s" % (key, value))
+            else:
+                body[i] = "%s=%s" % (key, value)
+        body.extend(extra)
+
+    return "\r\n".join(line for block in blocks for line in ([block[0]] if block[0] else []) + block[1])
+
+
+def install_preset(ftp, game, force):
+    target = game + "Oblivion.ini"
+    try:
+        ftp.size(target)
+        exists = True
+    except Exception:
+        exists = False
+    if exists and not force:
+        print("  kept your existing Oblivion.ini (use --force-ini to replace it)")
+        return
+    buf = io.BytesIO()
+    try:
+        ftp.retrbinary("RETR " + game + "Oblivion_default.ini", buf.write)
+    except Exception:
+        print("  (no Oblivion_default.ini on the console; skipping the settings preset)")
+        return
+    text = merge_preset(buf.getvalue().decode("latin-1"), read_preset(PRESET))
+    upload(ftp, text.encode("latin-1"), target)
+    print("  installed Oblivion.ini with the low/medium preset")
+
+
 def install_plugins(ftp, game, obse_dir, northernui_dir):
     if obse_dir:
         src = os.path.join(obse_dir, "obse_1_2_416.dll")
@@ -171,6 +254,8 @@ def main():
     ap.add_argument("--northernui")
     ap.add_argument("--redeploy", action="store_true")
     ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--no-ini", action="store_true", help="do not install the settings preset")
+    ap.add_argument("--force-ini", action="store_true", help="replace an existing Oblivion.ini")
     args = ap.parse_args()
 
     if not args.host:
@@ -228,6 +313,8 @@ def main():
     print("  Oblivion.exe + OblivionLauncher.exe  sha1 %s" % sha[:16])
 
     sync_manifest(ftp, game, entries)
+    if not args.no_ini:
+        install_preset(ftp, game, args.force_ini)
     install_plugins(ftp, game, args.obse, args.northernui)
 
     ok = True
