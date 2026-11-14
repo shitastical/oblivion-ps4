@@ -299,11 +299,12 @@ settings with NorthernUI reading the pad through OBSE.
 
 ## Settings
 
-`config/oblivion-preset.ini` is the starting point this project is built around:
+`config/Oblivion.ini` is the starting point this project is built around:
 low-to-medium effects, **medium textures**, **VSync on**, grass and distance
-draws cut hard, 1280×720. The installer merges those lines over your game's own
-`Oblivion_default.ini` and writes the result as `Oblivion.ini` in the game
-folder, so every key the preset does not mention keeps its stock value.
+draws cut hard, 1280×720. It is a **complete** ini — 600 lines, every section and
+every key — and the installer copies it over the console's copy as-is. Nothing
+is merged with whatever you had before, so a stray setting from an old install
+cannot change the result.
 
 It lands in the game folder rather than the Wine prefix because the preset sets
 `bUseMyGamesDirectory=0`: Oblivion then reads the `Oblivion.ini` sitting next to
@@ -334,7 +335,7 @@ currently hold 30 consistently. Treat 30 as the goal, not a result.
 
 Two ways to change it: edit the values in Playden's in-game **Options → Video**
 (they are written back to the same `Oblivion.ini`), or edit
-`config/oblivion-preset.ini` and re-run `python3 install.py --force-ini`.
+`config/Oblivion.ini` and re-run `python3 install.py --force-ini`.
 
 To go back to stock settings, delete `Oblivion.ini` from the game folder; the
 game falls back to `Oblivion_default.ini`.
@@ -451,7 +452,7 @@ patched build to both names makes the answer irrelevant.
 install.py                 the installer: fetch, patch, upload, manifest sync, plugins
 install-windows.bat        double-click wrapper for Windows
 requirements.txt           pefile, numpy
-config/oblivion-preset.ini low/medium settings, merged into Oblivion.ini
+config/Oblivion.ini        the complete low/medium settings file (600 lines)
 config/obse.ini            Data\OBSE\obse.ini with crash dumps on
 config/NorthernUI.ini      tuned controller settings (PS icons, 360° movement)
 tools/mk_obse_exe.py       the exe patcher, standalone
