@@ -78,21 +78,21 @@ order they cost you frames:
 | Shadows on Grass | **Off** | high | Only affects actor shadows on grass. |
 | Tree Canopy Shadows | **Off** | medium | |
 | Shadow Filtering | **Low** | medium | |
-| Ext. Shadows | **3** (of 10) | high | Number of actors casting shadows outdoors. |
-| Int. Shadows | **3** (of 10) | medium | Same, indoors. |
-| Grass Distance | **35%** | very high | Grass is the classic Oblivion frame-rate killer. Below ~25% the ground starts to look bald. |
-| View Distance | **60%** | high | `fNoLODFarDistancePct`. Lowering it shrinks what is drawn at all. |
+| Ext. Shadows | **2** (of 10) | high | Number of actors casting shadows outdoors. |
+| Int. Shadows | **2** (of 10) | medium | Same, indoors. |
+| Grass Distance | **25%** | very high | Grass is the classic Oblivion frame-rate killer. Below ~25% the ground starts to look bald. |
+| View Distance | **50%** | high | `fNoLODFarDistancePct`. Lowering it shrinks what is drawn at all. |
 | Object Fade | **50%** | high | Draws fewer small props near you. |
 | Item Fade | **40%** | medium | |
-| Actor Fade | **60%** | medium | Lower means NPCs pop in late. |
-| Tree Fade | **60%** | medium | |
+| Actor Fade | **50%** | medium | Lower means NPCs pop in late. |
+| Tree Fade | **50%** | medium | |
 | Distant Land | **On** | low | Turning this off empties the world; keep it. |
 | Distant Buildings | **On** | low-medium | Keeps cities on the horizon. |
 | Distant Trees | **On** | low-medium | |
-| Specular Distance | **60%** | low-medium | Shiny highlights at range. |
+| Specular Distance | **50%** | low-medium | Shiny highlights at range. |
 | HDR Lighting | **On** | low | Looks much better than Bloom; costs little on this GPU. |
 | Bloom Lighting | **Off** | — | Mutually exclusive with HDR. |
-| Water Detail | **High** | low | |
+| Water Detail | **Medium** | low | |
 | Water Reflections | **Off** | high | Renders the scene twice. First thing to re-enable if you have headroom. |
 | Water Ripples | **Off** | low | |
 | Window Reflections | **Off** | low-medium | |
@@ -101,6 +101,27 @@ order they cost you frames:
 
 That is the **60 fps starting point**. It should hold 60 in most exteriors and
 interiors. Cities and Oblivion gates are the stress cases.
+
+### If it still runs badly after that
+
+Work down this list; each step is a real, visible amount of frame rate:
+
+1. **Playden Resolution → 1024×768.** Ugly (4:3, bars at the sides) but it
+   removes the GPU from the conversation, which tells you whether you are CPU
+   bound. If fps barely moves, the CPU is the limit and you should go back to
+   720p and cut grass, fades and shadows instead.
+2. **Grass Distance → 15%.** Nearly the whole grass cost, still some tufts left.
+3. **Object Fade and Item Fade → 30%.**
+4. **Distant Trees → Off**, then **Distant Buildings → Off**. The horizon gets
+   emptier; the city load time and the CPU cost both drop.
+5. **Ext. Shadows and Int. Shadows → 0.** Characters stop casting shadows. The
+   lighting still works; it looks flatter.
+
+If the overlay shows **60 but the game feels choppy**, that is not a settings
+problem — it is frame pacing or shader compilation. Walk the same route twice:
+if the stutter fades on the second pass, it was shader compilation and the cache
+(`Oblivion.dxvk-cache`) will keep it away. Leave the overlay off when you are not
+measuring; the HUD itself costs a little.
 
 ### If it holds 60 comfortably, spend the headroom in this order
 
