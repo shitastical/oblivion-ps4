@@ -308,10 +308,11 @@ so a stray setting from an old install cannot change the result.
 
 What the 360 version actually was, and where that comes from:
 
-- **1024×600 with 2× MSAA.** Digital Foundry measured the 360 framebuffer at
-  1024×600, and later noted anti-aliasing went from 2× to 4× MSAA between
-  Oblivion and Fallout 3. That is well below 720p, and it is the single biggest
-  thing in the file that a "medium PC preset" would get wrong.
+- **1024×600.** Digital Foundry measured the 360 framebuffer at 1024×600, well
+  below 720p — the single biggest thing in the file that a "medium PC preset"
+  would get wrong. (The same article reports 2× MSAA on the 360; that is
+  disputed, and this config runs anti-aliasing off regardless, because it is
+  free frame time.)
 - **Reduced texture resolution**, so `iTexMipMapSkip=1` (medium).
 - **Fewer real-time shadows, shorter draw distances for foliage and detail.**
   Accounts of the 360/One back-compat version describe rocks fading in a few
@@ -323,7 +324,7 @@ That gives this file:
 | Setting | Value | Reason |
 |---|---|---|
 | Resolution | 1024×600 | The 360's actual framebuffer; below 720p |
-| Anti-aliasing | `iMultiSample=2` | The 360's 2× MSAA. Set 0 for more speed |
+| Anti-aliasing | `iMultiSample=0` | Off — free frame time, and 1024×600 needs the headroom |
 | Textures | `iTexMipMapSkip=1` | Medium textures, matching the 360's reduced set |
 | VSync | `iPresentInterval=1` | Tearing fix; 30 fps becomes a clean half of 60 Hz |
 | Grass | `iMinGrassSize=200`, distances 600/1200 | Grass fades in close, as on the 360 |
@@ -333,13 +334,12 @@ That gives this file:
 | Specular / env maps | 200 / 400 | Shortens the distance those passes cover |
 | Shadows | on — grass and canopy shadows, 2 exterior / 1 interior actor shadows, 1024 map | The 360's simplified real-time shadows, not PC max |
 | Water | reflections and displacements on, hi-res off | Matches the console's water without the 2× texture cost |
-| HDR | off, bloom on | HDR cannot be combined with anti-aliasing in Oblivion, and the 360 ran 2× MSAA |
+| HDR | off, bloom on | The expensive lighting path; bloom is the cheaper stand-in |
 | Distant cells | 10 (stock 25) | Fewer cells kept loaded |
 
-No HDR is deliberate: Oblivion cannot run HDR lighting and anti-aliasing at the
-same time (the game disables AA when HDR is on), and the 360 ran 2× MSAA, so the
-console's look is the bloom path — which is what `bDoHighDynamicRange=0` with the
-blur shader left enabled gives you here.
+No HDR and no anti-aliasing are both deliberate. HDR is the expensive lighting
+path and cannot run alongside anti-aliasing in Oblivion anyway; the blur shader
+stays on, so you get bloom lighting without the HDR cost, and no AA at all.
 
 The rest of the console's feature set is on: real-time shadows with grass and
 canopy shadows, water reflections and displacement, grass, trees and distant
