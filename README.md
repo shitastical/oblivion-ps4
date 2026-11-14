@@ -365,8 +365,11 @@ Playden's own rewrite of the exe ("de-stub") is harmless here: it removes the
 `.bind` section and moves the entry point, but every other section keeps its RVA
 and bytes, so OBSE's hardcoded addresses stay valid.
 
-Deeper detail — offsets, the IAT lookup that `pefile` gets wrong here, the
-overlay solver, the FTP/manifest code — is in [docs/TECHNICAL.md](docs/TECHNICAL.md).
+If you are re-deriving this for another game or another Playden build: the
+checked-in scripts are the reference. `tools/mk_obse_exe.py` prints the entry
+point, the `.obse` section address and the IAT slot it resolved, and
+`tools/check_crc.py` prints the value OBSE will see — those two outputs are the
+numbers that matter, and they come from the files rather than from this text.
 
 ---
 
@@ -404,7 +407,6 @@ tools/mk_obse_exe.py       the exe patcher, standalone
 tools/deploy_obse.py       upload + manifest sync, standalone
 tools/check_crc.py         prints the crc OBSE will see for an exe
 tools/obse_crc.py          shared checksum code
-docs/TECHNICAL.md          offsets, IAT lookup, checksum solver, FTP notes
 ```
 
 `work/` appears after the first run and holds the patched build used by
