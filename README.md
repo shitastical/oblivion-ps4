@@ -1,7 +1,7 @@
-# Oblivion on PS4 — OBSE, controller support, no more "unknown version"
+# Oblivion on PS4
 
-Everything needed to run **The Elder Scrolls IV: Oblivion** with **OBSE** and a
-**gamepad** on a jailbroken PS4, through [Playden for PS4][playden-ps4].
+Run **The Elder Scrolls IV: Oblivion** on your jailbroken PS4, with **mods
+(OBSE)** and a **gamepad**, through [Playden for PS4][playden-ps4].
 
 Oblivion on Playden almost works — the game starts and is playable. What does
 not work out of the box is **OBSE** (and therefore every mod that needs it,
