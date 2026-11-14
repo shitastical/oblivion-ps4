@@ -299,69 +299,52 @@ settings with NorthernUI reading the pad through OBSE.
 
 ## Settings
 
-`config/Oblivion.ini` aims at the **Xbox 360 build**, not at a PC "high" config:
-that console release is the version of Oblivion that was tuned to hold a
-console frame rate, so it is the most sensible thing to copy on a PS4. It is a
-**complete** ini — every section and every key — and the installer copies it
-over the console's copy as-is. Nothing is merged with whatever you had before,
-so a stray setting from an old install cannot change the result.
+`config/Oblivion.ini` is the game's own **"Very Low" launcher preset**, with
+VSync on. That is the recommendation for a PS4: **use very low settings.**
 
-What the 360 version actually was, and where that comes from:
+The reason is where the bottleneck actually is. A PS4 Slim's CPU is weak and old,
+and Oblivion's cost on it is dominated by *things* rather than pixels — every
+actor, creature, animated object and draw call the renderer has to set up and
+step through each frame. That is what a low-end PC preset fixes, and it is why
+this file turns off:
 
-- **1024×600.** Digital Foundry measured the 360 framebuffer at 1024×600, well
-  below 720p — the single biggest thing in the file that a "medium PC preset"
-  would get wrong. (The same article reports 2× MSAA on the 360; that is
-  disputed, and this config runs anti-aliasing off regardless, because it is
-  free frame time.)
-- **Reduced texture resolution**, so `iTexMipMapSkip=1` (medium).
-- **Fewer real-time shadows, shorter draw distances for foliage and detail.**
-  Accounts of the 360/One back-compat version describe rocks fading in a few
-  feet away, trees morphing from low-detail blobs and grass appearing close to
-  the player — which is what the LOD and grass block below reproduces.
+- **grass** completely (`fGrassStartFadeDistance=0`, `fGrassEndDistance=0`)
+- **all shadows** — actor, grass and canopy (`bDrawShadows=0`,
+  `bShadowsOnGrass=0`, `bDoCanopyShadowPass=0`, shadow counts 0)
+- **distant LOD** — land, buildings and trees (`bDisplayLOD* = 0`), tree LOD
+  multiplier dropped to 0.2
+- **water effects** — reflections, displacement and hi-res
+- **bloom and HDR** (`bUseBlurShader=0`, `bDoHighDynamicRange=0`)
+- **decals on animated meshes** and **eye environment mapping**
+- **refraction shaders** (`bUseRefractionShader=0`)
+- **small textures** (`iTexMipMapSkip=2`)
 
-That gives this file:
+and why it keeps `bFullBrightLighting=1` and drops the LOD pop flags on.
 
-| Setting | Value | Reason |
-|---|---|---|
-| Resolution | 1024×600 | The 360's actual framebuffer; below 720p |
-| Anti-aliasing | `iMultiSample=0` | Off — free frame time, and 1024×600 needs the headroom |
-| Textures | `iTexMipMapSkip=1` | Medium textures, matching the 360's reduced set |
-| VSync | `iPresentInterval=1` | Tearing fix; 30 fps becomes a clean half of 60 Hz |
-| Grass | `iMinGrassSize=200`, distances 600/1200 | Grass fades in close, as on the 360 |
-| Tall grass pass | off | Cheaper grass again |
-| Distant trees / LOD | trees on, multipliers 2.0 | Fewer LOD objects, shorter detail range |
-| Actor / item / object fade | 2.0 / 1.0 / 1.5 | The 360's short object fade, where rocks pop in nearby |
-| Specular / env maps | 200 / 400 | Shortens the distance those passes cover |
-| Shadows | on — grass and canopy shadows, 2 exterior / 1 interior actor shadows, 1024 map | The 360's simplified real-time shadows, not PC max |
-| Water | reflections and displacements on, hi-res off | Matches the console's water without the 2× texture cost |
-| HDR | off, bloom on | The expensive lighting path; bloom is the cheaper stand-in |
-| Distant cells | 10 (stock 25) | Fewer cells kept loaded |
+Two deliberate departures from the preset, both noted in the file:
 
-No HDR and no anti-aliasing are both deliberate. HDR is the expensive lighting
-path and cannot run alongside anti-aliasing in Oblivion anyway; the blur shader
-stays on, so you get bloom lighting without the HDR cost, and no AA at all.
+| | preset | here | why |
+|---|---|---|---|
+| Resolution | 640×480 | **1024×600** | The CPU cost is identical; the pixel cost of 1024×600 is trivial on the PS4's GPU, and 640×480 is nearly unreadable on a TV |
+| VSync | on | **on** | `iPresentInterval=1` — no change, listed because people ask |
 
-The rest of the console's feature set is on: real-time shadows with grass and
-canopy shadows, water reflections and displacement, grass, trees and distant
-land. What is reduced is *how far* those effects reach and how many actors cast
-shadows, which is the difference between the 360 build and a maxed-out PC.
+That resolution is the one thing to change if you are somehow GPU-bound rather
+than CPU-bound: set `iSize W=640` and `iSize H=480` and you have the exact preset.
+Conversely, because the limit is CPU-side, *lowering* it further will not buy you
+frame rate — the file already has nothing optional left to disable.
 
-One caveat: the 360 had no `Oblivion.ini` to read — these values are the closest
-PC equivalents, not the console's own numbers, and Bethesda's pre-release
-statements claimed the 360 version matched a maximum-settings PC, which the
-measurements above contradict. Treat this as a careful approximation.
-
-The file lives next to `Oblivion.exe` rather than in the Wine prefix because it
-sets `bUseMyGamesDirectory=0`: Oblivion then reads the `Oblivion.ini` beside the
-.exe instead of the one under `Documents\My Games\Oblivion`, which is the copy
-the installer can reach over FTP.
+The file is complete (every section and every key), not a patch: the installer
+copies it over the console's copy as-is, so no leftover setting from a previous
+install can change the result. It lives next to `Oblivion.exe` rather than in the
+Wine prefix because it sets `bUseMyGamesDirectory=0`, which is the copy the
+installer can reach over FTP.
 
 **Frame rate.** The goal is a *locked* 30 on a PS4 Slim; 60 is not realistic
-there. On a PS4 Pro the same settings should be able to reach 60 because the CPU
-has more headroom, but that has not been tested on a Pro. Neither figure is a
-measurement from this repo: nothing here has been benchmarked, and on the test
-Slim the game runs respectably but does not hold 30 at every moment. Treat 30 as
-the goal, not a result.
+there. On a PS4 Pro the same settings should reach 60 because the CPU has more
+headroom, but that has not been tested on a Pro. Neither figure is a measurement
+from this repo: nothing here has been benchmarked, and on the test Slim the game
+runs respectably but does not hold 30 at every moment. Treat 30 as the goal, not
+a result.
 
 Two ways to change it: edit the values in Playden's in-game **Options → Video**
 (they are written back to the same `Oblivion.ini`), or edit
