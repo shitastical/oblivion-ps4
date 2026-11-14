@@ -299,33 +299,58 @@ settings with NorthernUI reading the pad through OBSE.
 
 ## Settings
 
-`config/Oblivion.ini` is the starting point this project is built around:
-low-to-medium effects, **medium textures**, **VSync on**, grass and distance
-draws cut hard, 1280×720. It is a **complete** ini — 600 lines, every section and
-every key — and the installer copies it over the console's copy as-is. Nothing
-is merged with whatever you had before, so a stray setting from an old install
-cannot change the result.
+`config/Oblivion.ini` aims at the **Xbox 360 build**, not at a PC "high" config:
+that console release is the version of Oblivion that was tuned to hold a
+console frame rate, so it is the most sensible thing to copy on a PS4. It is a
+**complete** ini — every section and every key — and the installer copies it
+over the console's copy as-is. Nothing is merged with whatever you had before,
+so a stray setting from an old install cannot change the result.
 
-It lands in the game folder rather than the Wine prefix because the preset sets
-`bUseMyGamesDirectory=0`: Oblivion then reads the `Oblivion.ini` sitting next to
-`Oblivion.exe` instead of the one under `Documents\My Games\Oblivion`, and that
-is the copy the installer can reach, update and let you inspect over FTP.
+What the 360 version actually was, and where that comes from:
 
-What it changes, and why:
+- **1024×600 with 2× MSAA.** Digital Foundry measured the 360 framebuffer at
+  1024×600, and later noted anti-aliasing went from 2× to 4× MSAA between
+  Oblivion and Fallout 3. That is well below 720p, and it is the single biggest
+  thing in the file that a "medium PC preset" would get wrong.
+- **Reduced texture resolution**, so `iTexMipMapSkip=1` (medium).
+- **Fewer real-time shadows, shorter draw distances for foliage and detail.**
+  Accounts of the 360/One back-compat version describe rocks fading in a few
+  feet away, trees morphing from low-detail blobs and grass appearing close to
+  the player — which is what the LOD and grass block below reproduces.
+
+That gives this file:
 
 | Setting | Value | Reason |
 |---|---|---|
-| Textures | `iTexMipMapSkip=1` | Medium texture size — smaller files, less streaming stutter |
+| Resolution | 1024×600 | The 360's actual framebuffer; below 720p |
+| Anti-aliasing | `iMultiSample=2` | The 360's 2× MSAA. Set 0 for more speed |
+| Textures | `iTexMipMapSkip=1` | Medium textures, matching the 360's reduced set |
 | VSync | `iPresentInterval=1` | Tearing fix; 30 fps becomes a clean half of 60 Hz |
-| Resolution | 1280×720 | Sharper than the stock 640×480 without a 1080p fill cost |
-| Grass | `iMinGrassSize=150`, distances 1000/2000 | Grass is thousands of individual draws |
+| Grass | `iMinGrassSize=200`, distances 600/1200 | Grass fades in close, as on the 360 |
 | Tall grass pass | off | Cheaper grass again |
 | Canopy shadows | off | Extra shadow pass per frame |
-| Distant trees / LOD | trees off, multipliers 3.0 | Fewer LOD objects drawn in the distance |
-| Specular / env maps | 250 / 550 | Shortens the distance those passes cover |
+| Distant trees / LOD | trees on, multipliers 2.0 | Fewer LOD objects, shorter detail range |
+| Actor / item / object fade | 2.0 / 1.0 / 1.5 | The 360's short object fade, where rocks pop in nearby |
+| Specular / env maps | 200 / 400 | Shortens the distance those passes cover |
 | Water | reflections, displacements, hi-res off | Full-screen passes |
 | HDR | off | Bloom stays on; the HDR path is the expensive one |
-| Distant cells | 15 (stock 25) | Fewer cells kept loaded |
+| Distant cells | 10 (stock 25) | Fewer cells kept loaded |
+
+Deliberately **below** the 360: real-time shadows and water reflections are off
+here even though the console version had simplified ones, because those passes
+are the first thing to eat a frame and the goal is a locked 30. Turn them back
+on if you would rather have the look than the headroom: `bDrawShadows=1`,
+`bShadowsOnGrass=1`, `bUseWaterReflections=1`.
+
+One caveat: the 360 had no `Oblivion.ini` to read — these values are the closest
+PC equivalents, not the console's own numbers, and Bethesda's pre-release
+statements claimed the 360 version matched a maximum-settings PC, which the
+measurements above contradict. Treat this as a careful approximation.
+
+The file lives next to `Oblivion.exe` rather than in the Wine prefix because it
+sets `bUseMyGamesDirectory=0`: Oblivion then reads the `Oblivion.ini` beside the
+.exe instead of the one under `Documents\My Games\Oblivion`, which is the copy
+the installer can reach over FTP.
 
 **Frame rate.** The goal is a *locked* 30 on a PS4 Slim; 60 is not realistic
 there. On a PS4 Pro the same settings should be able to reach 60 because the CPU
