@@ -40,6 +40,7 @@ revert any patched exe before every launch.
 - [Did it work?](#did-it-work)
 - [After Playden repairs or updates](#after-playden-repairs-or-updates)
 - [Controller setup](#controller-setup)
+- [60 fps on a PS4 Slim](#60-fps-on-a-ps4-slim)
 - [Troubleshooting](#troubleshooting)
 - [Uninstalling](#uninstalling)
 - [How it works](#how-it-works)
@@ -99,7 +100,11 @@ PS4 package carries.
 2. **Start it once and let it reach the main menu**, then quit. This makes
    Playden finish setting up the Wine prefix, the game folder and its file
    manifest. The installer needs that folder to exist.
-3. Note the game folder if you ever need it by hand — it lives at
+3. **Hold the touchpad** while a name field is focused to force Playden's
+   on-screen keyboard — you need it to type your character's name at the start of
+   the game, and there is no other way to bring it up. Hold it until the keyboard
+   appears, type, then press **Enter** (or Cross) to confirm.
+4. Note the game folder if you ever need it by hand — it lives at
    `/data/PLDN10001/games/22330` (22330 is the Steam app id).
 
 The game folder will contain `Oblivion.exe`, `OblivionLauncher.exe`, `Data\`,
@@ -274,6 +279,26 @@ and works with Playden's default.
 
 ---
 
+## 60 fps on a PS4 Slim
+
+Oblivion is old enough to run on anything and single-threaded enough to run badly
+on everything. On a PS4 the CPU decides the frame rate, not the GPU, and the
+engine breaks above 60 fps, so the target is a **locked 60** with the settings
+that cost the least looks.
+
+Starting point: **1280×720**, Playden frame limit **60**, **Self Shadows off**,
+**Shadows on Grass off**, **Grass Distance ~35%**, **Object Fade ~50%**,
+**Water Reflections off**, everything else near default. That holds 60 in most
+of the game; you then spend the headroom on water reflections and grass, in that
+order.
+
+Full tables, the tuning order, what to expect in cities, and the ini-only keys
+that are worth having: **[docs/ps4-performance.md](docs/ps4-performance.md)**.
+
+Two rules that save time: change **one** setting at a time, and never set
+`iFPSClamp` — cap with Playden's frame limit instead, because the clamp makes
+time and physics misbehave.
+
 ## Troubleshooting
 
 | What you see | What it means |
@@ -286,6 +311,7 @@ and works with Playden's default.
 | Menus are tiny / stretched | That is Oblivion's UI at 1080p; NorthernUI's own settings can scale it. |
 | Installer cannot connect | GoldHEN's FTP server is off, the IP is wrong, or port 2121 is not open. `ping` the console first. |
 | Installer says `no game folder found` | Oblivion is not installed yet, or was never started once. Do [step 2](#2-oblivion-through-playden). |
+| Cannot type a character name | **Hold the touchpad** to bring up Playden's on-screen keyboard, then Enter. |
 | Installer stopped at `crc = ...` and refused | It downloaded an exe it does not recognise instead of patching blind. That is deliberate — patching an unknown layout would corrupt the game. |
 
 Log a bug with: the installer's output, `obse.log`, and `tools/check_crc.py`
@@ -388,6 +414,26 @@ PC. This repo ships no Bethesda files, no OBSE binaries, no NorthernUI binaries.
 the game works whichever one it picks.
 
 ---
+
+## What's in this repo
+
+```
+install.py                 the installer: fetch, patch, upload, manifest sync, plugins
+install-windows.bat        double-click wrapper for Windows
+requirements.txt           pefile, numpy
+config/obse.ini            Data\OBSE\obse.ini with crash dumps on
+config/NorthernUI.ini      tuned controller settings (PS icons, 360° movement)
+tools/mk_obse_exe.py       the exe patcher, standalone
+tools/deploy_obse.py       upload + manifest sync, standalone
+tools/check_crc.py         prints the crc OBSE will see for an exe
+tools/obse_crc.py          shared checksum code
+docs/TECHNICAL.md          offsets, IAT lookup, checksum solver, FTP notes
+docs/ps4-performance.md    60 fps tuning for a PS4 Slim
+```
+
+`work/` appears after the first run and holds the patched build used by
+`--redeploy`. It is gitignored and never published — it contains your copy of the
+game exe.
 
 ## Credits
 
