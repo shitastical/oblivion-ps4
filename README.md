@@ -328,19 +328,23 @@ That gives this file:
 | VSync | `iPresentInterval=1` | Tearing fix; 30 fps becomes a clean half of 60 Hz |
 | Grass | `iMinGrassSize=200`, distances 600/1200 | Grass fades in close, as on the 360 |
 | Tall grass pass | off | Cheaper grass again |
-| Canopy shadows | off | Extra shadow pass per frame |
 | Distant trees / LOD | trees on, multipliers 2.0 | Fewer LOD objects, shorter detail range |
 | Actor / item / object fade | 2.0 / 1.0 / 1.5 | The 360's short object fade, where rocks pop in nearby |
 | Specular / env maps | 200 / 400 | Shortens the distance those passes cover |
-| Water | reflections, displacements, hi-res off | Full-screen passes |
-| HDR | off | Bloom stays on; the HDR path is the expensive one |
+| Shadows | on — grass and canopy shadows, 2 exterior / 1 interior actor shadows, 1024 map | The 360's simplified real-time shadows, not PC max |
+| Water | reflections and displacements on, hi-res off | Matches the console's water without the 2× texture cost |
+| HDR | off, bloom on | HDR cannot be combined with anti-aliasing in Oblivion, and the 360 ran 2× MSAA |
 | Distant cells | 10 (stock 25) | Fewer cells kept loaded |
 
-Deliberately **below** the 360: real-time shadows and water reflections are off
-here even though the console version had simplified ones, because those passes
-are the first thing to eat a frame and the goal is a locked 30. Turn them back
-on if you would rather have the look than the headroom: `bDrawShadows=1`,
-`bShadowsOnGrass=1`, `bUseWaterReflections=1`.
+No HDR is deliberate: Oblivion cannot run HDR lighting and anti-aliasing at the
+same time (the game disables AA when HDR is on), and the 360 ran 2× MSAA, so the
+console's look is the bloom path — which is what `bDoHighDynamicRange=0` with the
+blur shader left enabled gives you here.
+
+The rest of the console's feature set is on: real-time shadows with grass and
+canopy shadows, water reflections and displacement, grass, trees and distant
+land. What is reduced is *how far* those effects reach and how many actors cast
+shadows, which is the difference between the 360 build and a maxed-out PC.
 
 One caveat: the 360 had no `Oblivion.ini` to read — these values are the closest
 PC equivalents, not the console's own numbers, and Bethesda's pre-release
