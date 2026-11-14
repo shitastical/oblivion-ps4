@@ -327,11 +327,12 @@ What it changes, and why:
 | HDR | off | Bloom stays on; the HDR path is the expensive one |
 | Distant cells | 15 (stock 25) | Fewer cells kept loaded |
 
-**Frame rate.** On a PS4 Slim, 60 is not realistic — the target here is a steady
-30. On a PS4 Pro, 60 is plausible for the same preset because the CPU has more
-headroom, but that has not been tested. Neither figure is a measurement from
-this repo: the preset has not been benchmarked, and the test console does not
-currently hold 30 consistently. Treat 30 as the goal, not a result.
+**Frame rate.** The goal is a *locked* 30 on a PS4 Slim; 60 is not realistic
+there. On a PS4 Pro the same settings should be able to reach 60 because the CPU
+has more headroom, but that has not been tested on a Pro. Neither figure is a
+measurement from this repo: nothing here has been benchmarked, and on the test
+Slim the game runs respectably but does not hold 30 at every moment. Treat 30 as
+the goal, not a result.
 
 Two ways to change it: edit the values in Playden's in-game **Options → Video**
 (they are written back to the same `Oblivion.ini`), or edit
